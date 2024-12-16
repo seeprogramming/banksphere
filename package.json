@@ -6,20 +6,23 @@
     "scripts": {
         "backend": "npm run dev -w bs_backend",
         "admin": "npm run dev -w bs_admin",
-        "start": "concurrently \"npm run backend\" \"npm run admin\"",
+        "employee": "npm run dev -w bs_employee",
+        "start": "concurrently \"npm run backend\" \"npm run admin\" \"npm run employee\"",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Sagar Shelke",
     "license": "ISC",
     "workspaces": [
-        "apps/*"
+        "apps/*",
+        "packages/*"
     ],
     "devDependencies": {
         "concurrently": "^9.1.0"
     },
     "dependencies": {
         "bs_backend": "^1.0.0",
-        "body-parser": "^1.20.3",
-        "express": "^4.21.2"
+        "express": "^4.21.2",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     }
 }
