@@ -1,16 +1,6 @@
-import viteLogo from '/vite.svg';
-
+import { Header } from '@banksphere/ui_library';
 function App() {
-    return (
-        <>
-            <div>
-                <a href='https://vite.dev' target='_blank'>
-                    <img src={viteLogo} className='logo' alt='Vite logo' />
-                </a>
-                <h1>BankSphere</h1>
-            </div>
-        </>
-    );
+    return <Header profile_name='Da' application_name='BankSphere Admin'></Header>;
 }
 
 export default App;
