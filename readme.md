@@ -4,11 +4,9 @@ This POC/project is under development.
 
 ## Project information
 
-### `Description`
-
 BankSphere POC is a project where I am exploring monorepos to manage multiple applications, including web interfaces for bank admin, employees, and customers, as well as a mobile app for customers, all from a single repository.
 
-### `Day to day updates/tasks`
+### Day to day updates/tasks
 
 `17th December 2024`
 
@@ -31,15 +29,15 @@ Created a common authentication system for customer,employee and admin with toke
 -   PostgreQL (Database)
 -   JWT
 
-### `Tech Stack`
+### Tech Stack
 
-#### `FrontEnd`
+#### FrontEnd
 
 -   ReactJS
 -   Vite
 -   Bootstrap
 
-#### `BackEnd`
+#### BackEnd
 
 -   NodeJS
 -   ExpressJS
@@ -47,21 +45,21 @@ Created a common authentication system for customer,employee and admin with toke
 -   PostgreSQL
 -   JWT
 
-### `.prettierrc`
+### .prettierrc
 
-    Styling changes for clean code.
+Styling changes for clean code.
 
-### `.eslintrc.json`
+### .eslintrc.json
 
-    Linting configuration to use standard code conventions and styles.
+Linting configuration to use standard code conventions and styles.
 
-### `IMPORTANT NOTES`
+### IMPORTANT NOTES
 
 #### Creating a prisma setup
 
 1. Setting Up Prisma with PostgreSQL
 
--   Install Prisma, run the following commands to set up Prisma in your project:
+Install Prisma, run the following commands to set up Prisma in your project:
 
 ```javascript
     npm install prisma --save-dev
@@ -70,7 +68,7 @@ Created a common authentication system for customer,employee and admin with toke
 
 2. Configure PostgreSQL in schema.prisma
 
--   Update the datasource block in schema.prisma with your PostgreSQL connection URL:
+Update the datasource block in schema.prisma with your PostgreSQL connection URL:
 
 ```javascript
     datasource db {
