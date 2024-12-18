@@ -6,38 +6,38 @@ This POC/project is under development.
 
 ### `Description`
 
-    BankSphere POC is a project where I am exploring monorepos to manage multiple applications, including web interfaces for bank admin, employees, and customers, as well as a mobile app for customers, all from a single repository.
+BankSphere POC is a project where I am exploring monorepos to manage multiple applications, including web interfaces for bank admin, employees, and customers, as well as a mobile app for customers, all from a single repository.
 
 ### `Day to day updates/tasks`
 
 `17th December 2024`
 
-    - Added role handlers for different kind of role (Ex: employee,admin,customer).
-    - Added token verification handlder.
-    - Created a global custom error handler which formats the erros in same format, as well as created a custom response handler to send the responses  in the same format.
+-   Added role handlers for different kind of role (Ex: employee,admin,customer).
+-   Added token verification handlder.
+-   Created a global custom error handler which formats the erros in same format, as well as created a custom response handler to send the responses in the same format.
 
 `16th December 2024`
 
-    Created a common authentication system for customer,employee and admin with token generation.Also finsihed integration postgreSQL as a database and prisma as a type ORM.
+Created a common authentication system for customer,employee and admin with token generation.Also finsihed integration postgreSQL as a database and prisma as a type ORM.
 
 `14th December 2024`
 
-    Created a basic monorepo structure which have a apps directory for the all backend, employee ui, admin ui etc codebase.
-    Working on a centralized packages folder which will contain all utilities, global configurations, ui library setups.
+-   Created a basic monorepo structure which have a apps directory for the all backend, employee ui, admin ui etc codebase.
+-   Created a centralized packages folder which will contain all utilities, global configurations, ui library setups.
 
 #### Libraries
 
-    -   prisma (ORM)
-    -   PostgreQL (Database)
-    -   JWT
+-   prisma (ORM)
+-   PostgreQL (Database)
+-   JWT
 
 ### `Tech Stack`
 
 #### `FrontEnd`
 
-    -   ReactJS
-    -   Vite
-    -   Bootstrap
+-   ReactJS
+-   Vite
+-   Bootstrap
 
 #### `BackEnd`
 
@@ -59,18 +59,18 @@ This POC/project is under development.
 
 #### Creating a prisma setup
 
-    1. Setting Up Prisma with PostgreSQL
+1. Setting Up Prisma with PostgreSQL
 
-    - Install Prisma, run the following commands to set up Prisma in your project:
+-   Install Prisma, run the following commands to set up Prisma in your project:
 
 ```javascript
     npm install prisma --save-dev
     npx prisma init
 ```
 
-    2. Configure PostgreSQL in schema.prisma
+2. Configure PostgreSQL in schema.prisma
 
-    - Update the datasource block in schema.prisma with your PostgreSQL connection URL:
+-   Update the datasource block in schema.prisma with your PostgreSQL connection URL:
 
 ```javascript
     datasource db {
@@ -83,13 +83,13 @@ This POC/project is under development.
     }
 ```
 
-    3. Ensure your .env file contains the DATABASE_URL:
+3. Ensure your .env file contains the DATABASE_URL:
 
 ```javascript
 DATABASE_URL = 'postgresql://<username>:<password>@<host>:<port>/<database>?schema=public';
 ```
 
-    4. Define the models
+4. Define the models
 
 ```javascript
     model User {
@@ -108,7 +108,7 @@ DATABASE_URL = 'postgresql://<username>:<password>@<host>:<port>/<database>?sche
     }
 ```
 
-    5. Use following commands to apply schema changes to database.
+5. Use following commands to apply schema changes to database.
 
 ```javascript
     npx prisma migrate dev --name init
