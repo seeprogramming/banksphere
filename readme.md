@@ -30,7 +30,7 @@ Created a common authentication system for customer,employee and admin with toke
 
 #### Libraries
 
-| Syntax         | Description                                       |
+| Package        | Description                                       |
 | -------------- | ------------------------------------------------- |
 | NodeJS         | Javascript runtime environment                    |
 | ExpressJS      | Framework for nodejs                              |
@@ -54,7 +54,6 @@ Created a common authentication system for customer,employee and admin with toke
 -   ExpressJS
 -   Prisma
 -   PostgreSQL
--   JWT
 
 ### .prettierrc
 
