@@ -8,6 +8,11 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`19th December 2024`
+
+-   Created services layer which will handle the core logic of the api's and shifted all logic from controller to service layer.
+-   Created a global validation handler.
+
 `17th December 2024`
 
 -   Added role handlers for different kind of role (Ex: employee,admin,customer).
@@ -25,9 +30,15 @@ Created a common authentication system for customer,employee and admin with toke
 
 #### Libraries
 
--   prisma (ORM)
--   PostgreQL (Database)
--   JWT
+| Syntax         | Description                                       |
+| -------------- | ------------------------------------------------- |
+| NodeJS         | Javascript runtime environment                    |
+| ExpressJS      | Framework for nodejs                              |
+| Prisma         | A ORM tool for database schemas and relationships |
+| @prisma/client | Auto generated query builder                      |
+| PostgreSQL     | Database                                          |
+| jsonwebtoken   | Token generator                                   |
+| joi            | Data validator                                    |
 
 ### Tech Stack
 
