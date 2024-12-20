@@ -6,8 +6,10 @@ const limiter = require('../utils/rateLimitHandler');
 
 const router = express.Router();
 
-router.post('/register', limiter, validateRequest(registerValidation), register);
-router.post('/login', limiter, validateRequest(loginValidation), login);
+const limiterForAuth = limiter(5);
+
+router.post('/register', limiterForAuth, validateRequest(registerValidation), register);
+router.post('/login', limiterForAuth, validateRequest(loginValidation), login);
 router.post('/logout', logout); //
 
 module.exports = router;

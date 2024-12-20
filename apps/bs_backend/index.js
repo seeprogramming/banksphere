@@ -23,16 +23,19 @@ app.use(express.json());
 //     })
 // );
 app.use(requestLogger);
+const limiterForAdminAPI = limiter(50);
+const limiterForEmployeeAPI = limiter(50);
+const limiterForCustomerAPI = limiter(50);
 
 app.use('/api/auth', authRoutes);
 
-app.get('/api/test1', limiter, verifyToken, authorizeRoles(['admin']), (req, res) => {
+app.get('/api/test1', limiterForAdminAPI, verifyToken, authorizeRoles(['admin']), (req, res) => {
     res.send('Hello Admin!');
 });
-app.get('/api/test2', verifyToken, authorizeRoles(['employee']), (req, res) => {
+app.get('/api/test2', limiterForEmployeeAPI, verifyToken, authorizeRoles(['employee']), (req, res) => {
     res.send('Hello Employee!');
 });
-app.get('/api/test3', verifyToken, authorizeRoles(['customer']), (req, res) => {
+app.get('/api/test3', limiterForCustomerAPI, verifyToken, authorizeRoles(['customer']), (req, res) => {
     res.send('Hello Customer!');
 });
 
