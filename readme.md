@@ -8,6 +8,11 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`20th December 2024`
+
+-   Created a logger for logging the api requests as well as errors, logs will saved inside logs folder, which will remove the logs automatically in 14 days.
+-   Created a api requests rate limiter which will logs certain api's after continue calls.
+
 `19th December 2024`
 
 -   Created services layer which will handle the core logic of the api's and shifted all logic from controller to service layer.
@@ -30,15 +35,19 @@ Created a common authentication system for customer,employee and admin with toke
 
 #### Libraries
 
-| Package        | Description                                       |
-| -------------- | ------------------------------------------------- |
-| NodeJS         | Javascript runtime environment                    |
-| ExpressJS      | Framework for nodejs                              |
-| Prisma         | A ORM tool for database schemas and relationships |
-| @prisma/client | Auto generated query builder                      |
-| PostgreSQL     | Database                                          |
-| jsonwebtoken   | Token generator                                   |
-| joi            | Data validator                                    |
+| Package                                                                              | Description                                       |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| NodeJS                                                                               | Javascript runtime environment                    |
+| ExpressJS                                                                            | Framework for nodejs                              |
+| Prisma                                                                               | A ORM tool for database schemas and relationships |
+| @prisma/client                                                                       | Auto generated query builder                      |
+| PostgreSQL                                                                           | Database                                          |
+| [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)                           | Token generator                                   |
+| [joi](https://www.npmjs.com/package/joi)                                             | Data validator                                    |
+| [winston](https://www.npmjs.com/package/winston)                                     | Logging library                                   |
+| [morgan](https://www.npmjs.com/package/morgan)                                       | HTTP request logger middleware for node.js        |
+| [express-rate-limit](https://www.npmjs.com/package/express-rate-limit)               | Basic rate-limiting middleware for Express        |
+| [winston-daily-rotate-file](https://www.npmjs.com/package/winston-daily-rotate-file) | Log file rotator                                  |
 
 ### Tech Stack
 

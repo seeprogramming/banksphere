@@ -1,6 +1,6 @@
 const ErrorHandler = require('./ErrorHandler');
 
-const validateRequest = (schema) => (req, res, next) => {
+const validateRequestHandler = (schema) => (req, res, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
         throw new ErrorHandler('Validation Error', 400, 'VALIDATION_ERROR', error.details);
@@ -8,4 +8,4 @@ const validateRequest = (schema) => (req, res, next) => {
     next();
 };
 
-module.exports = validateRequest;
+module.exports = validateRequestHandler;

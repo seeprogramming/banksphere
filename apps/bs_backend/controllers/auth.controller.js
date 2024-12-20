@@ -1,5 +1,5 @@
 const ErrorHandler = require('../utils/ErrorHandler');
-const responseHandler = require('../utils/ResponseHandler');
+const responseHandler = require('../utils/responseHandler');
 const authService = require('../services/auth.service');
 
 // User registration
