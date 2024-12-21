@@ -8,10 +8,15 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`21st December 2024`
+
+-   Create a middleware for unknown routes.
+-   Update rate limiter globally with role based approach.
+
 `20th December 2024`
 
 -   Created a logger for logging the api requests as well as errors, logs will saved inside logs folder, which will remove the logs automatically in 14 days.
--   Created a api requests rate limiter which will logs certain api's after continue calls.
+-   Created a api requests rate limiter which will logs certain api's after continue calls , it's a role based limiter.
 
 `19th December 2024`
 
