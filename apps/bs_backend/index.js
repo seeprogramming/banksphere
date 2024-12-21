@@ -5,7 +5,8 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const { verifyToken, authorizeRoles } = require('./controllers/auth.controller');
 const { requestLogger, logger } = require('./utils/loggingHandler');
-const limiter = require('./utils/rateLimitHandler');
+const roleBasedLimiter = require('./utils/rateLimitHandler');
+const ErrorHandler = require('./utils/ErrorHandler');
 
 const app = express();
 
@@ -23,20 +24,23 @@ app.use(express.json());
 //     })
 // );
 app.use(requestLogger);
-const limiterForAdminAPI = limiter(50);
-const limiterForEmployeeAPI = limiter(50);
-const limiterForCustomerAPI = limiter(50);
 
 app.use('/api/auth', authRoutes);
 
-app.get('/api/test1', limiterForAdminAPI, verifyToken, authorizeRoles(['admin']), (req, res) => {
+app.get('/api/test1', roleBasedLimiter('admin'), verifyToken, authorizeRoles(['admin']), (req, res) => {
     res.send('Hello Admin!');
 });
-app.get('/api/test2', limiterForEmployeeAPI, verifyToken, authorizeRoles(['employee']), (req, res) => {
+app.get('/api/test2', roleBasedLimiter('employee'), verifyToken, authorizeRoles(['employee']), (req, res) => {
     res.send('Hello Employee!');
 });
-app.get('/api/test3', limiterForCustomerAPI, verifyToken, authorizeRoles(['customer']), (req, res) => {
+app.get('/api/test3', roleBasedLimiter('customer'), verifyToken, authorizeRoles(['customer']), (req, res) => {
     res.send('Hello Customer!');
+});
+
+// Catch-All Route for Undefined Routes
+app.use((req, res, next) => {
+    // Create an instance of ErrorHandler for undefined routes
+    throw new ErrorHandler(`Cannot ${req.method} ${req.originalUrl}`, 404, 'ROUTE_NOT_FOUND', { field: 'route' });
 });
 
 // Global Error Handler Middleware
