@@ -57,7 +57,7 @@ const verifyToken = (req, res, next) => {
 const authorizeRoles = (roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
-            throw new ErrorHandler('Access denied', 402, 'ACCESS_ERROR', { field: 'role' });
+            throw new ErrorHandler(402, 'UNAUTHORIZED', { field: 'role' });
         }
         next();
     };

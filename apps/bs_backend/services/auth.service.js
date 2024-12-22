@@ -15,7 +15,7 @@ const registerUser = async (name, email, password, role) => {
 
     // If email is already registered throw error
     if (isEmailExists) {
-        throw new ErrorHandler('Email already exists', 409, 'EMAIL_ERROR', {
+        throw new ErrorHandler(409, 'EMAIL_EXISTS', {
             field: 'email',
         });
     }
@@ -45,14 +45,14 @@ const loginUser = async (email, password) => {
 
     if (!user) {
         //return res.status(404).json({ message: 'User not found' });
-        throw new ErrorHandler('User not found', 404, 'NOT_FOUND_ERROR', { field: 'user' });
+        throw new ErrorHandler(404, 'USER_NOT_FOUND', { field: 'user' });
     }
 
     // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
         // return res.status(401).json({ message: 'Invalid credentials' });
-        throw new ErrorHandler('Invalid credentials', 401, 'CREDENTIALS_ERROR', { field: 'user' });
+        throw new ErrorHandler(401, 'CREDENTIALS_ERROR', { field: 'user' });
     }
 
     // Generate JWT
@@ -78,7 +78,7 @@ const loginUser = async (email, password) => {
 const verifyUser = (authHeader) => {
     // Check if the token is provided
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new ErrorHandler('Access token is missing or invalid', 401, 'TOKEN_ERROR', { field: 'authorization' });
+        throw new ErrorHandler(401, 'TOKEN_ERROR', { field: 'authorization' });
     }
 
     const token = authHeader.split(' ')[1]; // Extract the token
@@ -87,7 +87,7 @@ const verifyUser = (authHeader) => {
         decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         return decoded;
     } catch (error) {
-        throw new ErrorHandler('Invalid access token', 401, 'TOKEN_ERROR', { field: 'authorization' });
+        throw new ErrorHandler(401, 'TOKEN_ERROR', { field: 'authorization' });
     }
 };
 
