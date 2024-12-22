@@ -10,8 +10,19 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 `21st December 2024`
 
--   Create a middleware for unknown routes.
+-   Updated messages file with a centralized approach where messages for system and user are more clear.
+-   Replaced error codes in all files
+-   Updated global error handler to handle different kinds of error messages dynamically.
+
+`21st December 2024`
+
+-   Created a middleware for unknown routes.
 -   Update rate limiter globally with role based approach.
+-   Created a centralized error, success etc. messages file
+-   Created a DB connection checking middleware, as well as API for system health check which stops any further operations if the DB is not connected
+-   Added error.stack to trace the stack of errors which will only works in develpment mode.
+-   Updated logger for more simple message logging as well as added loggers in various places to trace the logs.
+-   Added different kinds of security mechanism is the header using CORS and helmet.
 
 `20th December 2024`
 
@@ -135,4 +146,47 @@ DATABASE_URL = 'postgresql://<username>:<password>@<host>:<port>/<database>?sche
 ```javascript
     npx prisma migrate dev --name init
     npx prisma generate
+```
+
+# Security management for BankSphere
+
+| Header Name                      | Syntax                                                                           | Explanation                                                                                                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Content-Security-Policy          | `default-src 'self'; script-src 'self'; style-src 'self' https: 'unsafe-inline'` | Prevents XSS attacks by controlling which resources can be loaded. Restricts content sources to same origin with some exceptions for styles.         |
+| Cross-Origin-Embedder-Policy     | `require-corp`                                                                   | Prevents loading of cross-origin resources that don't explicitly grant permission. Enhances isolation of your web application.                       |
+| Cross-Origin-Opener-Policy       | `same-origin`                                                                    | Controls how your document interacts with other browsing contexts. Prevents other origins from opening/controlling your window.                      |
+| Cross-Origin-Resource-Policy     | `same-origin`                                                                    | Prevents other websites from embedding your resources. Protects against various cross-origin attacks.                                                |
+| Strict-Transport-Security        | `max-age=15552000; includeSubDomains`                                            | Forces browsers to use HTTPS for future visits. Prevents downgrade attacks and cookie hijacking for 180 days.                                        |
+| X-Content-Type-Options           | `nosniff`                                                                        | Prevents browsers from MIME-sniffing responses away from declared content-type. Stops content-sniffing attacks that could execute malicious content. |
+| X-Frame-Options                  | `DENY`                                                                           | Prevents your page from being displayed in an iframe. Protects against clickjacking attacks.                                                         |
+| X-XSS-Protection                 | `1; mode=block`                                                                  | Enables browser's XSS filtering. Stops pages from loading when XSS attacks are detected.                                                             |
+| Cache-Control                    | `no-store, no-cache, must-revalidate, private`                                   | Prevents caching of sensitive data. Forces fresh content fetch on each request.                                                                      |
+| Pragma                           | `no-cache`                                                                       | Legacy HTTP/1.0 way to specify no-caching. Included for backward compatibility with older browsers.                                                  |
+| Expires                          | `0`                                                                              | Forces immediate expiration of cached content. Ensures fresh content is always fetched from server.                                                  |
+| X-Content-Security-Policy        | `default-src 'none'`                                                             | Legacy header for older browsers. Provides additional layer of security for API responses.                                                           |
+| Access-Control-Allow-Origin      | `http://localhost:3000`                                                          | Specifies which origins can access the resource. Part of CORS security implementation.                                                               |
+| Access-Control-Allow-Credentials | `true`                                                                           | Allows authenticated requests to be made using credentials. Required for sessions/cookies in CORS requests.                                          |
+| Access-Control-Expose-Headers    | `X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset`                    | Makes specified headers accessible to client. Allows frontend to access rate limiting information.                                                   |
+| X-RateLimit-Limit                | `7`                                                                              | Specifies maximum number of requests allowed. Part of rate limiting implementation to prevent abuse.                                                 |
+| X-RateLimit-Remaining            | `6`                                                                              | Shows number of requests remaining in current time window. Helps clients track their API usage.                                                      |
+| X-RateLimit-Reset                | `1734764262`                                                                     | Unix timestamp when the rate limit window resets. Allows clients to know when they can make requests again.                                          |
+
+## Usage Notes:
+
+-   Headers are applied globally via Helmet middleware
+-   Additional custom headers are set via middleware
+-   CORS headers are managed by cors middleware
+-   Rate limiting headers are set by rate limiter middleware
+
+## Implementation Example:
+
+```javascript
+app.use(helmet()); // Applies most security headers
+
+app.use((req, res, next) => {
+    // Additional custom headers
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    next();
+});
 ```
