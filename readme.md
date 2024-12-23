@@ -8,7 +8,12 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
-`21st December 2024`
+`23rd December 2024`
+
+-   Sorted messages according to the type of message. Ex: Authorization, Errors etc. and updated the ErrorHandler logic accordingly.
+-   Updated response handler for success messages logic.
+
+`22nd December 2024`
 
 -   Updated messages file with a centralized approach where messages for system and user are more clear.
 -   Replaced error codes in all files
