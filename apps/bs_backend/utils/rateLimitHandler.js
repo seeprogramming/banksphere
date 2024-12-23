@@ -14,7 +14,7 @@ const roleBasedLimiter = (role) => {
         max: limits[role],
         handler: (req, res, next) => {
             next(
-                new ErrorHandler(429, 'RATE_LIMIT_EXCEEDED', {
+                new ErrorHandler(429, 'ERRORS', 'RATE_LIMIT_EXCEEDED', {
                     field: 'api',
                 })
             );

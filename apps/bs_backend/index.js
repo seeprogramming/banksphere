@@ -42,7 +42,7 @@ app.use(
             if (!origin) return callback(null, true);
 
             if (allowedOrigins.indexOf(origin) === -1) {
-                return callback(new ErrorHandler(403, 'CORS_ERROR', { field: 'route' }));
+                return callback(new ErrorHandler(403, 'ERRORS', 'CORS_ERROR', { field: 'route' }));
             }
             return callback(null, true);
         },
@@ -77,7 +77,7 @@ const checkDatabseConnection = async () => {
         await prisma.$queryRaw`SELECT 1`;
         isDbReady = true;
         logger.info({
-            message: messages.DB_READINESS.system,
+            message: messages.SYSTEM.DB_READINESS.system,
             service: process.env.SERVICE_NAME,
             environment: process.env.NODE_ENV || 'development',
         });
@@ -86,11 +86,11 @@ const checkDatabseConnection = async () => {
         isDbReady = false;
         if (error) {
             logger.warn({
-                message: messages.DB_READINESS_FAILED.system,
+                message: messages.SYSTEM.DB_READINESS_FAILED.system,
                 service: process.env.SERVICE_NAME,
                 environment: process.env.NODE_ENV || 'development',
             });
-            new ErrorHandler(503, 'DB_READINESS_FAILED', {
+            new ErrorHandler(503, 'SYSTEM', 'DB_READINESS_FAILED', {
                 field: 'database',
             });
         }
@@ -99,13 +99,13 @@ const checkDatabseConnection = async () => {
 };
 
 // Application Health Check API
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', async (req, res, next) => {
     try {
         const isDbConnected = await checkDatabseConnection();
 
         // Build health status
         const healthStatus = {
-            status: messages.SYSTEM_STATUS.UP.system,
+            status: messages.SYSTEM.SYSTEM_STATUS.UP.system,
             timestamp: new Date().toISOString(),
             details: {
                 uptime: process.uptime(),
@@ -117,19 +117,20 @@ app.get('/api/health', async (req, res) => {
         // Respond with health status
         if (isDbConnected) {
             logger.info({
-                message: messages.HEALTH_READINESS.system,
+                message: messages.SYSTEM.HEALTH_READINESS.system,
                 service: process.env.SERVICE_NAME,
                 environment: process.env.NODE_ENV || 'development',
             });
-            responseHandler(res, healthStatus);
+            responseHandler(res, healthStatus, 'SYSTEM', 'UP');
         } else {
             logger.warn({
-                message: messages.HEALTH_READINESS_FAILED.system,
+                message: messages.SYSTEM.HEALTH_READINESS_FAILED.system,
                 service: process.env.SERVICE_NAME,
                 environment: process.env.NODE_ENV || 'development',
             });
-            healthStatus.status = messages.SYSTEM_STATUS.DOWN.system;
-            responseHandler(res, healthStatus);
+            healthStatus.status = messages.SYSTEM.SYSTEM_STATUS.DOWN.system;
+
+            responseHandler(res, healthStatus, 'SYSTEM', 'DOWN');
         }
     } catch (error) {
         next(error);
@@ -143,12 +144,12 @@ app.use(async (req, res, next) => {
 
     if (!isDbReady) {
         logger.error({
-            message: messages.SERVICE_UNAVAILABLE.system,
+            message: messages.SERVICE_DOWN.system,
             service: process.env.SERVICE_NAME,
             environment: process.env.NODE_ENV || 'development',
         });
         next(
-            new ErrorHandler(503, 'SERVICE_DOWN', {
+            new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
                 field: 'database',
             })
         );
@@ -171,7 +172,7 @@ app.get('/api/test3', roleBasedLimiter('customer'), verifyToken, authorizeRoles(
 // Catch-All Route for Undefined Routes
 app.use((req, res, next) => {
     // Create an instance of ErrorHandler for undefined routes
-    throw new ErrorHandler(404, 'ROUTE_NOT_FOUND', { field: 'route' });
+    throw new ErrorHandler(404, 'ERRORS', 'ROUTE_NOT_FOUND', { field: 'route' });
 });
 
 // Global Error Handler Middleware
@@ -203,7 +204,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
     logger.info({
-        message: messages.PORT_LISTENING_MSG(process.env.SERVICE_NAME, process.env.NODE_ENV, PORT),
+        message: messages.SYSTEM.PORT_LISTENING_MSG(process.env.SERVICE_NAME, process.env.NODE_ENV, PORT),
         service: process.env.SERVICE_NAME,
         environment: process.env.NODE_ENV || 'development',
     });
