@@ -8,7 +8,7 @@ const register = async (req, res, next) => {
 
     try {
         const user = await authService.registerUser(name, email, password, role);
-        return responseHandler(res, user, 'User registered successfully');
+        return responseHandler(res, user, 'AUTHENTICATION', 'USER_CREATION_SUCCESS');
     } catch (error) {
         next(error); // Pass the error to the global error handler
     }
@@ -20,7 +20,7 @@ const login = async (req, res, next) => {
 
     try {
         const data = await authService.loginUser(email, password);
-        return responseHandler(res, data, 'Successfully logged in');
+        return responseHandler(res, data, 'AUTHENTICATION', 'USER_LOGIN_SUCCESS');
     } catch (error) {
         next(error); // Pass the error to the global error handler
     }
@@ -57,7 +57,7 @@ const verifyToken = (req, res, next) => {
 const authorizeRoles = (roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
-            throw new ErrorHandler(402, 'UNAUTHORIZED', { field: 'role' });
+            throw new ErrorHandler(402, 'ERRORS', 'UNAUTHORIZED', { field: 'role' });
         }
         next();
     };
