@@ -8,6 +8,7 @@ const roleBasedLimiter = require('../utils/rateLimitHandler');
 const router = express.Router();
 
 router.post('/register', roleBasedLimiter('auth'), validateRequest(registerValidation), register);
+
 router.post('/login', roleBasedLimiter('auth'), validateRequest(loginValidation), login);
 router.post('/logout', logout); //
 

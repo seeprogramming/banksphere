@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const authRoutes = require('./routes/auth.routes');
 const { verifyToken, authorizeRoles } = require('./controllers/auth.controller');
@@ -14,6 +16,17 @@ const messages = require('./utils/messages');
 const app = express();
 
 const PORT = process.env.PORT || 8800;
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'BankSphere API',
+            version: '1.0.0',
+            description: 'BankSphere API Documentation',
+        },
+    },
+    apis: ['./routes/**/*.js'], // Path to API docs
+};
 
 // Parse allowed origins from env
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000']; // Default fallback
@@ -70,87 +83,230 @@ app.use((req, res, next) => {
 
 app.use(requestLogger);
 
-// Checks DB readiness before doing any operations
-let isDbReady = false;
-const checkDatabseConnection = async () => {
-    try {
-        await prisma.$queryRaw`SELECT 1`;
-        isDbReady = true;
-        logger.info({
-            message: messages.SYSTEM.DB_READINESS.system,
-            service: process.env.SERVICE_NAME,
-            environment: process.env.NODE_ENV || 'development',
-        });
-        return true;
-    } catch (error) {
-        isDbReady = false;
-        if (error) {
-            logger.warn({
-                message: messages.SYSTEM.DB_READINESS_FAILED.system,
-                service: process.env.SERVICE_NAME,
-                environment: process.env.NODE_ENV || 'development',
-            });
-            new ErrorHandler(503, 'SYSTEM', 'DB_READINESS_FAILED', {
-                field: 'database',
-            });
-        }
-        return false;
-    }
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// // Checks DB readiness before doing any operations
+// let isDbReady = false;
+// const checkDatabseConnection = async () => {
+//     try {
+//         await prisma.$queryRaw`SELECT 1`;
+//         isDbReady = true;
+//         logger.info({
+//             message: messages.SYSTEM.DB_READINESS.system,
+//             service: process.env.SERVICE_NAME,
+//             environment: process.env.NODE_ENV || 'development',
+//         });
+//         return true;
+//     } catch (error) {
+//         isDbReady = false;
+//         if (error) {
+//             logger.warn({
+//                 message: messages.SYSTEM.DB_READINESS_FAILED.system,
+//                 service: process.env.SERVICE_NAME,
+//                 environment: process.env.NODE_ENV || 'development',
+//             });
+//             new ErrorHandler(503, 'SYSTEM', 'DB_READINESS_FAILED', {
+//                 field: 'database',
+//             });
+//         }
+//         return false;
+//     }
+// };
+
+// // Application Health Check API
+// app.get('/api/health', async (req, res, next) => {
+//     try {
+//         const isDbConnected = await checkDatabseConnection();
+
+//         // Build health status
+//         const healthStatus = {
+//             status: messages.SYSTEM.SYSTEM_STATUS.UP.system,
+//             timestamp: new Date().toISOString(),
+//             details: {
+//                 uptime: process.uptime(),
+//                 memoryUsage: process.memoryUsage(),
+//                 database: isDbConnected ? 'Connected' : 'Disconnected',
+//             },
+//         };
+
+//         // Respond with health status
+//         if (isDbConnected) {
+//             logger.info({
+//                 message: messages.SYSTEM.HEALTH_READINESS.system,
+//                 service: process.env.SERVICE_NAME,
+//                 environment: process.env.NODE_ENV || 'development',
+//             });
+//             responseHandler(res, healthStatus, 'SYSTEM', 'UP');
+//         } else {
+//             logger.warn({
+//                 message: messages.SYSTEM.HEALTH_READINESS_FAILED.system,
+//                 service: process.env.SERVICE_NAME,
+//                 environment: process.env.NODE_ENV || 'development',
+//             });
+//             healthStatus.status = messages.SYSTEM.SYSTEM_STATUS.DOWN.system;
+
+//             responseHandler(res, healthStatus, 'SYSTEM', 'DOWN');
+//         }
+//     } catch (error) {
+//         next(error);
+//     }
+// });
+
+// // Middleware to block operations if DB is down
+// app.use(async (req, res, next) => {
+//     // DB readiness check
+//     await checkDatabseConnection();
+
+//     if (!isDbReady) {
+//         logger.error({
+//             message: messages.ERRORS.SERVICE_DOWN.system,
+//             service: process.env.SERVICE_NAME,
+//             environment: process.env.NODE_ENV || 'development',
+//         });
+//         next(
+//             new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
+//                 field: 'database',
+//             })
+//         );
+//     }
+//     next();
+// });
+
+// Database health check configuration
+const dbHealthConfig = {
+    timeout: 3000, // Database query timeout in ms
+    maxRetries: 3, // Maximum retry attempts for DB connection
+    retryDelay: 1000, // Delay between retries in ms
 };
 
-// Application Health Check API
+// Enhanced database check with retries and detailed diagnostics
+let isDbReady = false;
+const checkDatabaseHealth = async () => {
+    let retries = 0;
+    let lastError = null;
+
+    while (retries < dbHealthConfig.maxRetries) {
+        try {
+            const startTime = Date.now();
+            await Promise.race([
+                prisma.$queryRaw`SELECT 1`,
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Database timeout')), dbHealthConfig.timeout)
+                ),
+            ]);
+
+            const responseTime = Date.now() - startTime;
+            isDbReady = true;
+
+            logger.info({
+                message: messages.SYSTEM.DB_READINESS.system,
+                service: process.env.SERVICE_NAME,
+                environment: process.env.NODE_ENV,
+                responseTime,
+            });
+
+            return {
+                status: 'connected',
+                responseTime,
+                retryCount: retries,
+                lastError: null,
+            };
+        } catch (error) {
+            lastError = error;
+            retries++;
+
+            if (retries < dbHealthConfig.maxRetries) {
+                await new Promise((resolve) => setTimeout(resolve, dbHealthConfig.retryDelay));
+            }
+        }
+    }
+
+    isDbReady = false;
+    logger.warn({
+        message: messages.SYSTEM.DB_READINESS_FAILED.system,
+        service: process.env.SERVICE_NAME,
+        environment: process.env.NODE_ENV,
+        error: lastError?.message,
+        retryAttempts: retries,
+    });
+
+    return {
+        status: 'disconnected',
+        responseTime: null,
+        retryCount: retries,
+        lastError: lastError?.message,
+    };
+};
+
+// Enhanced health check endpoint focused on database
 app.get('/api/health', async (req, res, next) => {
     try {
-        const isDbConnected = await checkDatabseConnection();
+        const startTime = Date.now();
+        const dbHealth = await checkDatabaseHealth();
 
-        // Build health status
         const healthStatus = {
-            status: messages.SYSTEM.SYSTEM_STATUS.UP.system,
+            status:
+                dbHealth.status === 'connected' ? messages.SYSTEM.HEALTHY.system : messages.SYSTEM.NOT_HEALTHY.system,
             timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'development',
             details: {
+                database: {
+                    ...dbHealth,
+                    type: process.env.DATABASE_TYPE || 'postgres',
+                    host: process.env.DATABASE_HOST, // Consider if you want to expose this
+                    name: process.env.DATABASE_NAME,
+                },
                 uptime: process.uptime(),
-                memoryUsage: process.memoryUsage(),
-                database: isDbConnected ? 'Connected' : 'Disconnected',
+                memory: {
+                    heap: process.memoryUsage().heapUsed,
+                    external: process.memoryUsage().external,
+                },
             },
+            responseTime: Date.now() - startTime,
         };
 
-        // Respond with health status
-        if (isDbConnected) {
+        if (dbHealth.status === 'connected') {
             logger.info({
                 message: messages.SYSTEM.HEALTH_READINESS.system,
                 service: process.env.SERVICE_NAME,
-                environment: process.env.NODE_ENV || 'development',
+                responseTime: healthStatus.responseTime,
             });
-            responseHandler(res, healthStatus, 'SYSTEM', 'UP');
-        } else {
-            logger.warn({
-                message: messages.SYSTEM.HEALTH_READINESS_FAILED.system,
-                service: process.env.SERVICE_NAME,
-                environment: process.env.NODE_ENV || 'development',
-            });
-            healthStatus.status = messages.SYSTEM.SYSTEM_STATUS.DOWN.system;
-
-            responseHandler(res, healthStatus, 'SYSTEM', 'DOWN');
+            return responseHandler(res, healthStatus, 'SYSTEM', 'HEALTHY', 200);
         }
+
+        logger.warn({
+            message: messages.SYSTEM.HEALTH_READINESS_FAILED.system,
+            service: process.env.SERVICE_NAME,
+            details: dbHealth,
+        });
+
+        // Adding retry information in headers
+        res.set({
+            'Retry-After': '5',
+            'X-Database-Status': 'disconnected',
+        });
+
+        return responseHandler(res, healthStatus, 'SYSTEM', 'NOT_HEALTHY', 503);
     } catch (error) {
         next(error);
     }
 });
 
-// Middleware to block operations if DB is down
+// Enhanced middleware with more detailed error response
 app.use(async (req, res, next) => {
-    // DB readiness check
-    await checkDatabseConnection();
-
     if (!isDbReady) {
         logger.error({
-            message: messages.SERVICE_DOWN.system,
+            message: messages.ERRORS.SERVICE_DOWN.system,
             service: process.env.SERVICE_NAME,
-            environment: process.env.NODE_ENV || 'development',
+            path: req.path,
         });
-        next(
+
+        return next(
             new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
                 field: 'database',
+                retryAfter: 30,
+                suggestion: 'Database connection is currently unavailable. Please try again later.',
             })
         );
     }

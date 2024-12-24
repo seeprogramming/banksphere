@@ -8,6 +8,12 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`24th December 2024`
+
+-   Updated the new messages.
+-   Updated health api in more depth.
+-   Created swagger api documentation.
+
 `23rd December 2024`
 
 -   Sorted messages according to the type of message. Ex: Authorization, Errors etc. and updated the ErrorHandler logic accordingly.
