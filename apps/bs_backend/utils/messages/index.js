@@ -34,6 +34,14 @@ module.exports = {
             system: 'DOWN',
             user: 'System is offline. Please check back later.',
         },
+        HEALTHY: {
+            system: 'HEALTHY',
+            user: 'System is healthy.',
+        },
+        NOT_HEALTHY: {
+            system: 'NOT_HEALTHY',
+            user: 'System is not healthy.',
+        },
         PORT_LISTENING_MSG: (service_name, env, port) =>
             `${service_name} server is running in ${env} mode on port ${port}`,
     },
