@@ -6,7 +6,7 @@ const registerValidation = Joi.object({
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
         .required(),
     password: Joi.string().min(8).pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
-    role: Joi.string().valid('admin', 'employee', 'user').required(),
+    role: Joi.string().valid('admin', 'employee', 'customer').required(),
 });
 
 const loginValidation = Joi.object({

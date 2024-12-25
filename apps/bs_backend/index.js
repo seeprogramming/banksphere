@@ -4,29 +4,18 @@ const helmet = require('helmet');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-const authRoutes = require('./routes/auth.routes');
-const { verifyToken, authorizeRoles } = require('./controllers/auth.controller');
-const { requestLogger, logger } = require('./utils/loggingHandler');
-const roleBasedLimiter = require('./utils/rateLimitHandler');
-const ErrorHandler = require('./utils/ErrorHandler');
 const prisma = require('./prisma-client');
+const authRoutes = require('./routes/auth.routes');
+const testRoutes = require('./routes/test.routes');
+const { requestLogger, logger } = require('./utils/loggingHandler');
+const ErrorHandler = require('./utils/ErrorHandler');
 const responseHandler = require('./utils/responseHandler');
 const messages = require('./utils/messages');
+const swaggerOptions = require('./utils/configurations/swagger');
 
 const app = express();
 
 const PORT = process.env.PORT || 8800;
-
-const swaggerOptions = {
-    swaggerDefinition: {
-        info: {
-            title: 'BankSphere API',
-            version: '1.0.0',
-            description: 'BankSphere API Documentation',
-        },
-    },
-    apis: ['./routes/**/*.js'], // Path to API docs
-};
 
 // Parse allowed origins from env
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000']; // Default fallback
@@ -83,95 +72,9 @@ app.use((req, res, next) => {
 
 app.use(requestLogger);
 
+// Swagger setup
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// // Checks DB readiness before doing any operations
-// let isDbReady = false;
-// const checkDatabseConnection = async () => {
-//     try {
-//         await prisma.$queryRaw`SELECT 1`;
-//         isDbReady = true;
-//         logger.info({
-//             message: messages.SYSTEM.DB_READINESS.system,
-//             service: process.env.SERVICE_NAME,
-//             environment: process.env.NODE_ENV || 'development',
-//         });
-//         return true;
-//     } catch (error) {
-//         isDbReady = false;
-//         if (error) {
-//             logger.warn({
-//                 message: messages.SYSTEM.DB_READINESS_FAILED.system,
-//                 service: process.env.SERVICE_NAME,
-//                 environment: process.env.NODE_ENV || 'development',
-//             });
-//             new ErrorHandler(503, 'SYSTEM', 'DB_READINESS_FAILED', {
-//                 field: 'database',
-//             });
-//         }
-//         return false;
-//     }
-// };
-
-// // Application Health Check API
-// app.get('/api/health', async (req, res, next) => {
-//     try {
-//         const isDbConnected = await checkDatabseConnection();
-
-//         // Build health status
-//         const healthStatus = {
-//             status: messages.SYSTEM.SYSTEM_STATUS.UP.system,
-//             timestamp: new Date().toISOString(),
-//             details: {
-//                 uptime: process.uptime(),
-//                 memoryUsage: process.memoryUsage(),
-//                 database: isDbConnected ? 'Connected' : 'Disconnected',
-//             },
-//         };
-
-//         // Respond with health status
-//         if (isDbConnected) {
-//             logger.info({
-//                 message: messages.SYSTEM.HEALTH_READINESS.system,
-//                 service: process.env.SERVICE_NAME,
-//                 environment: process.env.NODE_ENV || 'development',
-//             });
-//             responseHandler(res, healthStatus, 'SYSTEM', 'UP');
-//         } else {
-//             logger.warn({
-//                 message: messages.SYSTEM.HEALTH_READINESS_FAILED.system,
-//                 service: process.env.SERVICE_NAME,
-//                 environment: process.env.NODE_ENV || 'development',
-//             });
-//             healthStatus.status = messages.SYSTEM.SYSTEM_STATUS.DOWN.system;
-
-//             responseHandler(res, healthStatus, 'SYSTEM', 'DOWN');
-//         }
-//     } catch (error) {
-//         next(error);
-//     }
-// });
-
-// // Middleware to block operations if DB is down
-// app.use(async (req, res, next) => {
-//     // DB readiness check
-//     await checkDatabseConnection();
-
-//     if (!isDbReady) {
-//         logger.error({
-//             message: messages.ERRORS.SERVICE_DOWN.system,
-//             service: process.env.SERVICE_NAME,
-//             environment: process.env.NODE_ENV || 'development',
-//         });
-//         next(
-//             new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
-//                 field: 'database',
-//             })
-//         );
-//     }
-//     next();
-// });
+app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Database health check configuration
 const dbHealthConfig = {
@@ -240,7 +143,7 @@ const checkDatabaseHealth = async () => {
 };
 
 // Enhanced health check endpoint focused on database
-app.get('/api/health', async (req, res, next) => {
+app.get('/api/v1/health', async (req, res, next) => {
     try {
         const startTime = Date.now();
         const dbHealth = await checkDatabaseHealth();
@@ -313,17 +216,8 @@ app.use(async (req, res, next) => {
     next();
 });
 
-app.use('/api/auth', authRoutes);
-
-app.get('/api/test1', roleBasedLimiter('admin'), verifyToken, authorizeRoles(['admin']), (req, res) => {
-    res.send('Hello Admin!');
-});
-app.get('/api/test2', roleBasedLimiter('employee'), verifyToken, authorizeRoles(['employee']), (req, res) => {
-    res.send('Hello Employee!');
-});
-app.get('/api/test3', roleBasedLimiter('customer'), verifyToken, authorizeRoles(['customer']), (req, res) => {
-    res.send('Hello Customer!');
-});
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1', testRoutes);
 
 // Catch-All Route for Undefined Routes
 app.use((req, res, next) => {
@@ -359,6 +253,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
+    checkDatabaseHealth(); // Add this
     logger.info({
         message: messages.SYSTEM.PORT_LISTENING_MSG(process.env.SERVICE_NAME, process.env.NODE_ENV, PORT),
         service: process.env.SERVICE_NAME,
