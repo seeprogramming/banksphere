@@ -11,11 +11,12 @@ const { requestLogger, logger } = require('./utils/loggingHandler');
 const ErrorHandler = require('./utils/ErrorHandler');
 const responseHandler = require('./utils/responseHandler');
 const messages = require('./utils/messages');
-const swaggerOptions = require('./utils/configurations/swagger');
+const swaggerOptions = require('./configurations/swagger');
 
 const app = express();
 
 const PORT = process.env.PORT || 8800;
+const DB_HEALTH_CHECK_INTERVAL = 10000; // Check every 30 seconds
 
 // Parse allowed origins from env
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000']; // Default fallback
@@ -100,14 +101,17 @@ const checkDatabaseHealth = async () => {
             ]);
 
             const responseTime = Date.now() - startTime;
+            const wasDown = !isDbReady;
             isDbReady = true;
 
-            logger.info({
-                message: messages.SYSTEM.DB_READINESS.system,
-                service: process.env.SERVICE_NAME,
-                environment: process.env.NODE_ENV,
-                responseTime,
-            });
+            if (wasDown) {
+                logger.info({
+                    message: 'Database connection restored',
+                    service: process.env.SERVICE_NAME,
+                    environment: process.env.NODE_ENV,
+                    responseTime,
+                });
+            }
 
             return {
                 status: 'connected',
@@ -126,14 +130,6 @@ const checkDatabaseHealth = async () => {
     }
 
     isDbReady = false;
-    logger.warn({
-        message: messages.SYSTEM.DB_READINESS_FAILED.system,
-        service: process.env.SERVICE_NAME,
-        environment: process.env.NODE_ENV,
-        error: lastError?.message,
-        retryAttempts: retries,
-    });
-
     return {
         status: 'disconnected',
         responseTime: null,
@@ -142,6 +138,33 @@ const checkDatabaseHealth = async () => {
     };
 };
 
+/**
+ * @swagger
+ * /api/v1/health:
+ *   get:
+ *     summary: BankSphere application health
+ *     description: Checks the health of the applocation
+ *     responses:
+ *       200:
+ *         description: Registration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: number
+ *                   description: System is healthy
+ *                 details:
+ *                   type: object
+ *                   description: Name of the user
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Authentication failed
+ *       500:
+ *         description: Server error
+ */
 // Enhanced health check endpoint focused on database
 app.get('/api/v1/health', async (req, res, next) => {
     try {
@@ -209,7 +232,6 @@ app.use(async (req, res, next) => {
             new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
                 field: 'database',
                 retryAfter: 30,
-                suggestion: 'Database connection is currently unavailable. Please try again later.',
             })
         );
     }
@@ -252,8 +274,19 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json(response);
 });
 
+// Add this before app.listen
+const startHealthMonitoring = () => {
+    // Initial check
+    checkDatabaseHealth();
+
+    // Set up periodic checks
+    setInterval(async () => {
+        await checkDatabaseHealth();
+    }, DB_HEALTH_CHECK_INTERVAL);
+};
+
 app.listen(PORT, () => {
-    checkDatabaseHealth(); // Add this
+    startHealthMonitoring();
     logger.info({
         message: messages.SYSTEM.PORT_LISTENING_MSG(process.env.SERVICE_NAME, process.env.NODE_ENV, PORT),
         service: process.env.SERVICE_NAME,
