@@ -41,7 +41,12 @@ const registerUser = async (name, email, password, role) => {
 // Login
 const loginUser = async (email, password) => {
     // Check if user exists
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } }).catch((err) => {
+        throw new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
+            field: 'database',
+            retryAfter: 30,
+        });
+    });
 
     if (!user) {
         //return res.status(404).json({ message: 'User not found' });

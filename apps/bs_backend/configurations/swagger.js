@@ -32,7 +32,7 @@ const swaggerOptions = {
             },
         ],
     },
-    apis: ['./routes/**/*.js'], // Path to the API docs
+    apis: ['./**/*.js'], // Path to the API docs
 };
 
 module.exports = swaggerOptions;

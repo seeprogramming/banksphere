@@ -8,6 +8,12 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`26th December 2024`
+
+-   Moved swagger configuration to different file.
+-   Added interval for db connection check
+-   Added swagger doc for /health
+
 `25th December 2024`
 
 -   Created swagger api doc for login and registration api's.
