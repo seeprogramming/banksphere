@@ -76,19 +76,21 @@ Created a common authentication system for customer,employee and admin with toke
 
 #### Libraries
 
-| Package                                                                              | Description                                       |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| NodeJS                                                                               | Javascript runtime environment                    |
-| ExpressJS                                                                            | Framework for nodejs                              |
-| Prisma                                                                               | A ORM tool for database schemas and relationships |
-| @prisma/client                                                                       | Auto generated query builder                      |
-| PostgreSQL                                                                           | Database                                          |
-| [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)                           | Token generator                                   |
-| [joi](https://www.npmjs.com/package/joi)                                             | Data validator                                    |
-| [winston](https://www.npmjs.com/package/winston)                                     | Logging library                                   |
-| [morgan](https://www.npmjs.com/package/morgan)                                       | HTTP request logger middleware for node.js        |
-| [express-rate-limit](https://www.npmjs.com/package/express-rate-limit)               | Basic rate-limiting middleware for Express        |
-| [winston-daily-rotate-file](https://www.npmjs.com/package/winston-daily-rotate-file) | Log file rotator                                  |
+| Package                                                                              | Description                                                                                                              |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| NodeJS                                                                               | Javascript runtime environment                                                                                           |
+| ExpressJS                                                                            | Framework for nodejs                                                                                                     |
+| Prisma                                                                               | A ORM tool for database schemas and relationships                                                                        |
+| @prisma/client                                                                       | Auto generated query builder                                                                                             |
+| PostgreSQL                                                                           | Database                                                                                                                 |
+| [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)                           | Token generator                                                                                                          |
+| [joi](https://www.npmjs.com/package/joi)                                             | Data validator                                                                                                           |
+| [winston](https://www.npmjs.com/package/winston)                                     | Logging library                                                                                                          |
+| [morgan](https://www.npmjs.com/package/morgan)                                       | HTTP request logger middleware for node.js                                                                               |
+| [express-rate-limit](https://www.npmjs.com/package/express-rate-limit)               | Basic rate-limiting middleware for Express                                                                               |
+| [winston-daily-rotate-file](https://www.npmjs.com/package/winston-daily-rotate-file) | Log file rotator                                                                                                         |
+| [swagger-jsdoc](https://www.npmjs.com/package/swagger-jsdoc)                         | This library reads your JSDoc-annotated source code and generates an OpenAPI (Swagger) specification                     |
+| [swagger-ui-express](https://www.npmjs.com/package/swagger-ui-express)               | This module allows you to serve auto-generated swagger-ui generated API docs from express, based on a swagger.json file. |
 
 ### Tech Stack
 
