@@ -8,6 +8,10 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`28th December 2024`
+
+-   Working on bug fixes for workflows
+
 `26th December 2024`
 
 -   Moved swagger configuration to different file.
