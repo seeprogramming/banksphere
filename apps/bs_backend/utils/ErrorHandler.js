@@ -9,9 +9,9 @@ class ErrorHandler extends Error {
             ...details,
             timestamp: new Date().toISOString(),
             requestId: `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            path: details.path || '',
-            method: details.method || '',
-            reason: details.reason || this.getSystemReason(errCategory, errorCode),
+            path: details?.path || '',
+            method: details?.method || '',
+            reason: details?.reason || this.getSystemReason(errCategory, errorCode),
         };
         this.serviceName = process.env.SERVICE_NAME;
         this.userMessage =

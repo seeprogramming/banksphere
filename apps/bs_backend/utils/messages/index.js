@@ -100,6 +100,10 @@ module.exports = {
             system: '',
             user: 'Your account has been successfully created. Welcome aboard!',
         },
+        USER_CREATION_FAILED: {
+            system: '',
+            user: 'Something went wrong while creating your account. Please try again later.',
+        },
         USER_LOGIN_SUCCESS: {
             system: '',
             user: 'Welcome back! You’ve logged in successfully.',
