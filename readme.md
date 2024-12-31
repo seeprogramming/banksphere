@@ -8,6 +8,10 @@ BankSphere POC is a project where I am exploring monorepos to manage multiple ap
 
 ### Day to day updates/tasks
 
+`31st December 2024`
+
+-   Working on bug fixes and enhancements
+
 `29th December 2024`
 
 -   Working on bug fixes and enhancements
