@@ -7,11 +7,18 @@ const { excludeKeys } = require('../utils/excludeProps');
 // Register
 const registerUser = async (name, email, password, role) => {
     // Check if email already exists
-    const isEmailExists = await prisma.user.findUnique({
-        where: {
-            email,
-        },
-    });
+    const isEmailExists = await prisma.user
+        .findUnique({
+            where: {
+                email,
+            },
+        })
+        .catch((err) => {
+            throw new ErrorHandler(503, 'ERRORS', 'SERVICE_DOWN', {
+                field: 'database',
+                retryAfter: 30,
+            });
+        });
 
     // If email is already registered throw error
     if (isEmailExists) {
@@ -30,6 +37,7 @@ const registerUser = async (name, email, password, role) => {
             email,
             password: hashedPassword,
             role,
+            // tokenVersion: 0,
         },
     });
 
@@ -94,6 +102,20 @@ const verifyUser = (authHeader) => {
     } catch (error) {
         throw new ErrorHandler(401, 'AUTHENTICATION', 'TOKEN_ERROR', { field: 'authorization' });
     }
+};
+
+// Generate a refresh token
+const generateRefreshToken = (user) => {
+    return jwt.sign(
+        {
+            id: user.id,
+            role: user.role,
+            name: user.name,
+            tokenVersion: user.tokenVersion,
+        },
+        process.env.JWT_REFRESH_SECRET_KEY,
+        { expiresIn: '7d' }
+    );
 };
 
 module.exports = { registerUser, loginUser, verifyUser };
