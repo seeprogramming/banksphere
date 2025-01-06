@@ -86,7 +86,7 @@ const verifyUser = (authHeader) => {
         throw new ErrorHandler(401, 'AUTHENTICATION', 'TOKEN_ERROR', { field: 'authorization' });
     }
 
-    const token = authHeader.split(' ')[1]; // Extract the token
+    const token = authHeader.split(' ')[1]; // Extract the token from header
     let decoded;
     try {
         decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
